@@ -27,16 +27,16 @@ public class VoteAuPlurielReader {
     private static void parseLine(String s, Node n) {
 	Scanner sc = new Scanner(s);
 	sc.next();
-	TreeSet<Pair> pQueue = new TreeSet<Pair>(new Comparator<Pair>() { //Objects are stored in a sorted and ascending order
+	TreeSet<Pair> pQueue = new TreeSet<Pair>(new Comparator<Pair>() { 
 		public int compare(Pair p, Pair q) {
-		    return (int) (p.weight - q.weight);//returns positive value is p>q asc order
+		    return (int) (p.weight - q.weight);
 		}
 	    });
 	int k = 1;
-	for (; k < 11; k++) { //читаем 10 чисел в строчке начиная с 1 колонки
+	for (; k < 11; k++) { 
 	    int val = Integer.parseInt(sc.next());
 	    if (val > 0 && val <= CANDIDATES.length) {
-		pQueue.add(new Pair(CANDIDATES[k - 1], val)); //показывает какой кандидат на какой позиции
+		pQueue.add(new Pair(CANDIDATES[k - 1], val)); 
 	    }		
 	}
 	pQueue.add(new Pair(END_CANDIDATE, 1000));
@@ -55,10 +55,7 @@ public class VoteAuPlurielReader {
 	boolean valid = (sc.next().equals("1"));
 	if (valid && val >= 0 && val < CANDIDATES.length) {
 	    double coeff = COEFFS[val];
-            //System.out.println("old "+n);
-            //System.out.println("list "+list);
 	    n.addVote(list, coeff);
-            //System.out.println("new "+n.toString());
 	}
     }
 
@@ -67,7 +64,7 @@ public class VoteAuPlurielReader {
 	try {
 	    Scanner input = new Scanner(new FileReader(fileName));
 //k<12390
-	    for (int k = 0; k < 20; k++) {		
+	    for (int k = 0; k < 12390; k++) {		
                 parseLine(input.nextLine(), root);
 	    }
 	} catch(Exception e) { // No comment please...

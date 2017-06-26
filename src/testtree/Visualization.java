@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package testtree;
 
 import java.awt.*;
@@ -12,33 +7,30 @@ import java.util.*;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.Timer;
-import static testtree.TestTree.c;
-import static testtree.TestTree.check_init;
 import static testtree.TestTree.compute_perm;
-import static testtree.TestTree.fh;
-import static testtree.TestTree.mlp;
-import static testtree.TestTree.pp;
-import static testtree.TestTree.c_list;
-import static testtree.TestTree.frame;
-import static testtree.TestTree.ns;
-import static testtree.TestTree.c_pos;
-import static testtree.TestTree.order;
-import static testtree.TestTree.panel1;
-import static testtree.TestTree.root;
-
-import static testtree.TestTree.tst;
-import static testtree.TestTree.zero;
 /**
  *
  * @author dina
  */
 public class Visualization {
-    //public static List<Integer>init=new ArrayList<>();
+    public static List<Deque<Pair>> c_list;
+    public static List<Integer> order=new ArrayList<>();
+    public static Node root;
+    public static Container c;
+    public static boolean check_init=false;
+    public static int count=0;
+    public static int perm_count=0;
+    public static int c_pos[];
+    public static List<Integer> tst;
+    public static int p_fh[];
+    public static boolean zero=true;
+    public static VotePanel panel1;
+    public static JRadioButton fh;
+    public static JRadioButton ns;
+    public static JRadioButton mlp;
+    public static JFrame frame;
     public static int i=0;
     public static int step=2;
     public static boolean done=false;
@@ -56,31 +48,22 @@ public class Visualization {
     private javax.swing.Timer timer;
     private javax.swing.Timer timer2;
     private javax.swing.Timer timer3;
-    private javax.swing.Timer timer4;
     public static javax.swing.Timer time;
     public static boolean fh_check=true;
     public static boolean mlp_check=false;
     public static boolean ns_check=false;
-    public static boolean pp_check=false;
     public static int []desired;
     protected List<Deque<Pair>>list;
     protected static List<Deque<Pair>>tlist=new ArrayList<>();
     public static List<Integer>cc=new ArrayList<>();
     public static List<Integer>sorted=new ArrayList<>();
-    public Visualization(List<Deque <Pair>>list){
-       this.list=list; 
-    }
-    public Visualization(){}
-    
+
     public void init(){
         root=VoteAuPlurielReader.read("/Users/dina/NetBeansProjects/Preference/src/preference/20120621_voteaupluriel.txt");
-       // System.out.println("root "+root.toString());
 	c_list = root.serialize();
         VotePanel.position=new int[c_list.size()];
-	//jlm_list = root.serialize();//to do a permutation
         int l=c_list.size();
         c_pos=new int[l];
-        //System.out.println("before sorting "+fh_list);
 	frame = new JFrame("Vote Au Pluriel");
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	c = frame.getContentPane();
@@ -91,12 +74,10 @@ public class Visualization {
         fh = new JRadioButton("Candidate 1");
         ns = new JRadioButton("Candidate 2");
         mlp = new JRadioButton("Candidate 3");
-        pp=new JRadioButton("Candidate 4");
         ButtonGroup group = new ButtonGroup();
         group.add(fh);
         group.add(ns);
         group.add(mlp);
-        group.add(pp);
         ButtonGroup group2 = new ButtonGroup();
         group2.add(chkK);
         group2.add(chkK4);
@@ -108,23 +89,16 @@ public class Visualization {
 	ns.setFont(new java.awt.Font("Arial", Font.ITALIC | Font.BOLD, 15));
         mlp.setForeground(Color.MAGENTA.darker());
 	mlp.setFont(new java.awt.Font("Arial", Font.ITALIC | Font.BOLD, 15));
-        pp.setForeground(Color.orange);
-	pp.setFont(new java.awt.Font("Arial", Font.ITALIC | Font.BOLD, 15));
         b.setFont(new java.awt.Font("Arial", Font.ITALIC | Font.BOLD, 15));
         chkK.setFont(new java.awt.Font("Arial", Font.ITALIC | Font.BOLD, 15));
         chkK4.setFont(new java.awt.Font("Arial", Font.ITALIC | Font.BOLD, 15));
         chkBorda.setFont(new java.awt.Font("Arial", Font.ITALIC | Font.BOLD, 15));
         for(int k=0;k<c_list.size();k++){
-            order.add(k);//0 1 2 3 4 5 6 7 8 9 10
+            order.add(k);
         }
-          
-  
-        Collections.sort(c_list, new CandidateComparator(VoteAuPlurielReader.CANDIDATES[2]));
-                //new AdvancedCandidateComparator(VoteAuPlurielReader.CANDIDATES[2], root));
-                             
+        Collections.sort(c_list, new AdvancedCandidateComparator(VoteAuPlurielReader.CANDIDATES[2], root));
+        //new CandidateComparator(VoteAuPlurielReader.CANDIDATES[2]));                  
         panel1 = new VotePanel(c_list, VoteAuPlurielReader.CANDIDATES, root.getWeight());
-        //System.out.println("test "+VotePanel.test);
-         
         for(Deque<Pair>pa:c_list){
                  tlist.add(pa);
         }
@@ -144,7 +118,6 @@ public class Visualization {
         menu.add(fh);
         menu.add(ns);
         menu.add(mlp);
-       // menu.add(pp);
         menu.add(b);
         menu.add(chkK);
         menu.add(chkK4);
@@ -185,7 +158,6 @@ public class Visualization {
                                     timer.stop();
                                     fh_check=false;
                                     mlp_check=false;
-                                    pp_check=false;
                                 }
                                 if(step<=10){
                                     swap_columns(step-1,VoteAuPlurielReader.CANDIDATES[0]);
@@ -195,10 +167,6 @@ public class Visualization {
                                     }
                                     if(mlp_check){
                                          c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[5],VoteAuPlurielReader.CANDIDATES[0],step);
-                                       
-                                    }
-                                    if(pp_check){
-                                         c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[8],VoteAuPlurielReader.CANDIDATES[0],step);
                                        
                                     }
                                      step++;
@@ -219,7 +187,6 @@ public class Visualization {
                                     timer3.stop();
                                     fh_check=false;
                                     ns_check=false;
-                                    pp_check=false;
                                 }
                                 if(step<=10){
                                     swap_columns(step-1,VoteAuPlurielReader.CANDIDATES[5]);
@@ -229,10 +196,6 @@ public class Visualization {
                                     }
                                     if(ns_check){
                                         c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[0],VoteAuPlurielReader.CANDIDATES[5],step);
-                                        
-                                    }
-                                    if(pp_check){
-                                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[8],VoteAuPlurielReader.CANDIDATES[5],step);
                                         
                                     }
                                      step++;
@@ -252,7 +215,6 @@ timer2 = new Timer(15, new ActionListener(){//FB
                                     timer2.stop();
                                     ns_check=false;
                                     mlp_check=false;
-                                    pp_check=false;
                                 }
                                 if(step<=10){
                                     swap_columns(step-1,VoteAuPlurielReader.CANDIDATES[2]);
@@ -263,9 +225,6 @@ timer2 = new Timer(15, new ActionListener(){//FB
                                     if(mlp_check){
                                         c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[5],VoteAuPlurielReader.CANDIDATES[2],step);
                                     }
-                                    if(pp_check){
-                                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[8],VoteAuPlurielReader.CANDIDATES[2],step);
-                                    }
                                      step++;
                                 
                                 timer2.start();
@@ -273,37 +232,7 @@ timer2 = new Timer(15, new ActionListener(){//FB
                                }
                         }
                         });
-timer4 = new Timer(15, new ActionListener(){//PP
-                        public void actionPerformed(ActionEvent e) {
-                            transition(c_pos, timer4);
-                            if(zero){
-                                if(step==2)
-                                       check_init=true;
-                                if(step==11){
-                                    timer4.stop();
-                                    ns_check=false;
-                                    mlp_check=false;
-                                    fh_check=false;
-                                }
-                                if(step<=10){
-                                    swap_columns(step-1,VoteAuPlurielReader.CANDIDATES[8]);
-                                    if(ns_check){
-                                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[0],VoteAuPlurielReader.CANDIDATES[8],step);
-                                      
-                                    }
-                                    if(mlp_check){
-                                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[5],VoteAuPlurielReader.CANDIDATES[8],step);
-                                    }
-                                    if(fh_check){
-                                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[2],VoteAuPlurielReader.CANDIDATES[8],step);
-                                    }
-                                     step++;
-                                
-                                timer4.start();
-                                }
-                               }
-                        }
-                        });
+
   ns.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -341,306 +270,217 @@ timer4 = new Timer(15, new ActionListener(){//PP
                     if(mlp_check){
                         c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[5],VoteAuPlurielReader.CANDIDATES[0],1); 
                     }
-                    if(pp_check){
-                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[8],VoteAuPlurielReader.CANDIDATES[0],1); 
-                    }
                    if( !timer.isRunning()){
                          timer.start();
                    }
             }
             }
         });
-    pp.addActionListener(new ActionListener() {
+        fh.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                i++;
-                pp_check=true;
-                step=2;
-                check_init=false;
-                c_pos=new int[c_list.size()];
-                sorted=new ArrayList<>();
-                cc=new ArrayList<>();
-                desired=new int[VotePanel.test.size()];
-                if(i==1){
-                      for(int y=0;y<VotePanel.test.size();y++){
-                        VotePanel.position[y]=VotePanel.test.get(y);
-                      }
-                     for(int p=0;p<VotePanel.test.size()-1;p++){
-                         VotePanel.init.add(VotePanel.test.get(p+1)-VotePanel.test.get(p));
-                     }
-                     VotePanel.init.add(VotePanel.last);
+                if (!timer2.isRunning() && !timer3.isRunning() && !timer.isRunning() && !prev_fh) {
+                    prev_fh = true;
+                    prev_mlp = false;
+                    prev_ns = false;
+                    fh_check = true;
+                    step = 2;
+                    check_init = false;
+                    c_pos = new int[c_list.size()];
+                    sorted = new ArrayList<>();
+                    cc = new ArrayList<>();
+                    desired = new int[VotePanel.test.size()];
+                    VotePanel.test = new ArrayList<>();
+                    for (int i = 0; i < VotePanel.position.length; i++) {
+                        VotePanel.test.add(VotePanel.position[i]);
+                        Collections.sort(VotePanel.test);
+                    }
+                    swap_columns(0, VoteAuPlurielReader.CANDIDATES[2]);
+                    if (ns_check) {
+                        c_list = animation(c_list, VoteAuPlurielReader.CANDIDATES[0], VoteAuPlurielReader.CANDIDATES[2], 1);
+                    }
+                    if (mlp_check) {
+                        c_list = animation(c_list, VoteAuPlurielReader.CANDIDATES[5], VoteAuPlurielReader.CANDIDATES[2], 1);
+                    }
+
+                    if (!timer2.isRunning()) {
+                        timer2.start();
+                    }
                 }
-                else{
-                VotePanel.test=new ArrayList<>();
-                    for(int i=0;i<VotePanel.position.length;i++){
-                        VotePanel.test.add(VotePanel.position[i]);
-                        Collections.sort(VotePanel.test);
-                    }
-                 }
-                    swap_columns(0,VoteAuPlurielReader.CANDIDATES[8]);
-                    if(fh_check)
-                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[2],VoteAuPlurielReader.CANDIDATES[8],1);
-                    if(mlp_check){
-                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[5],VoteAuPlurielReader.CANDIDATES[8],1); 
-                    }
-                    if(ns_check){
-                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[0],VoteAuPlurielReader.CANDIDATES[8],1); 
-                    }
-                   if( !timer4.isRunning()){
-                         timer4.start();
-                   }
             }
         });
-    fh.addActionListener(new ActionListener() {
+        mlp.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                 if(!timer2.isRunning() && !timer3.isRunning() && !timer.isRunning() && !prev_fh){
-                prev_fh=true;
-                prev_mlp=false;
-                prev_ns=false;
-                fh_check=true;
-                step=2;
-                check_init=false;
-                c_pos=new int[c_list.size()];
-              //  VotePanel.init=new ArrayList<>(); THIS
-                sorted=new ArrayList<>();
-                cc=new ArrayList<>();
-             //   tlist=new ArrayList<>(); THIS ONE
-               // System.out.println("dd");
-              //  if(fh.isEnabled()){
-                    // PROBLEM IS IN VOTEPANEL.POSITION?
-                //i++;
-                      //if(i==1){
-                          desired=new int[VotePanel.test.size()];
-                     VotePanel.test=new ArrayList<>();
-                    for(int i=0;i<VotePanel.position.length;i++){
-                        VotePanel.test.add(VotePanel.position[i]);
-                        Collections.sort(VotePanel.test);
+                if (!timer2.isRunning() && !timer3.isRunning() && !timer.isRunning() && !prev_mlp) {
+                    prev_fh = false;
+                    prev_mlp = true;
+                    prev_ns = false;
+                    i++;
+                    mlp_check = true;
+                    step = 2;
+                    check_init = false;
+                    c_pos = new int[c_list.size()];
+                    sorted = new ArrayList<>();
+                    cc = new ArrayList<>();
+                    desired = new int[VotePanel.test.size()];
+                    if (i == 1) {
+                        for (int y = 0; y < VotePanel.test.size(); y++) {
+                            VotePanel.position[y] = VotePanel.test.get(y);
+                        }
+                        for (int p = 0; p < VotePanel.test.size() - 1; p++) {
+                            VotePanel.init.add(VotePanel.test.get(p + 1) - VotePanel.test.get(p));
+                        }
+                        VotePanel.init.add(VotePanel.last);
+                    } else {
+                        VotePanel.test = new ArrayList<>();
+                        for (int i = 0; i < VotePanel.position.length; i++) {
+                            VotePanel.test.add(VotePanel.position[i]);
+                            Collections.sort(VotePanel.test);
+                        }
                     }
-                    swap_columns(0,VoteAuPlurielReader.CANDIDATES[2]);
-                    if(ns_check)
-                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[0],VoteAuPlurielReader.CANDIDATES[2],1);
-                    if(mlp_check)
-                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[5],VoteAuPlurielReader.CANDIDATES[2],1);
-                    if(pp_check)
-                        c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[8],VoteAuPlurielReader.CANDIDATES[2],1);
-                   if( !timer2.isRunning()){
-                         timer2.start();
-                   }
-            }
-            }
-        });
-      mlp.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                 if(!timer2.isRunning() && !timer3.isRunning() && !timer.isRunning()&& !prev_mlp){
-                     prev_fh=false;
-                    prev_mlp=true;
-                    prev_ns=false;
-                i++;
-                mlp_check=true;
-                step=2;
-                check_init=false;
-                c_pos=new int[c_list.size()];
-              //  VotePanel.init=new ArrayList<>(); THIS
-                sorted=new ArrayList<>();
-                cc=new ArrayList<>();
-                desired=new int[VotePanel.test.size()];
-                 if(i==1){
-                      for(int y=0;y<VotePanel.test.size();y++){
-                        VotePanel.position[y]=VotePanel.test.get(y);
-                      }
-                     for(int p=0;p<VotePanel.test.size()-1;p++){
-                         VotePanel.init.add(VotePanel.test.get(p+1)-VotePanel.test.get(p));
-                     }
-                     VotePanel.init.add(VotePanel.last);
+                    swap_columns(0, VoteAuPlurielReader.CANDIDATES[5]);
+                    if (fh_check) {
+                        c_list = animation(c_list, VoteAuPlurielReader.CANDIDATES[2], VoteAuPlurielReader.CANDIDATES[5], 1);
+                    }
+                    if (ns_check) {
+                        c_list = animation(c_list, VoteAuPlurielReader.CANDIDATES[0], VoteAuPlurielReader.CANDIDATES[5], 1);
+                    }
+                    if (!timer3.isRunning()) {
+                        timer3.start();
+                    }
                 }
-                 else{
-                VotePanel.test=new ArrayList<>();
-                    for(int i=0;i<VotePanel.position.length;i++){
-                        VotePanel.test.add(VotePanel.position[i]);
-                        Collections.sort(VotePanel.test);
-                    }
-                 }
-                    swap_columns(0,VoteAuPlurielReader.CANDIDATES[5]);
-                    if(fh_check){
-                     c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[2],VoteAuPlurielReader.CANDIDATES[5],1);
-                    }
-                    if(ns_check){
-                      c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[0],VoteAuPlurielReader.CANDIDATES[5],1);  
-                    }
-                    if(pp_check){
-                      c_list=animation(c_list,VoteAuPlurielReader.CANDIDATES[8],VoteAuPlurielReader.CANDIDATES[5],1);  
-                    }
-                   if( !timer3.isRunning()){
-                         timer3.start();
-                   }
-            }
             }
         });
-    }     
+    }
 
     public static List<Deque<Pair>> animation(List<Deque<Pair>> list1, Candidate c1, Candidate c2,int stepMax){
-        List<Deque<Pair>>list2=new ArrayList<>(); //I copy the content of list1 in list2
+        List<Deque<Pair>>list2=new ArrayList<>(); 
 
         for(Deque<Pair>pair:list1){
             list2.add(pair);
         }
-        // System.out.println("list1 "+list1);
-        Collections.sort(list2, new OrderComparator(c1,c2, root,stepMax,list2));//then I sort it by c2 in position stepMax
-        //System.out.println("list2 "+list2);
-        //System.out.println("tlist "+tlist);
-        tst=compute_perm(tlist,list2);//compute permutation between the 2 lists
-       // System.out.println("tst "+tst);
-        if(check_init){ //zachem?
+        Collections.sort(list2, new OrderComparator(c1,c2, root,stepMax,list2));
+        tst=compute_perm(tlist,list2);
+        if(check_init){ 
             VotePanel.test=new ArrayList<>();
             for(int i=0;i<VotePanel.position.length;i++){
                 VotePanel.test.add(VotePanel.position[i]);
                 Collections.sort(VotePanel.test);
-                
             }
-             // System.out.println("test "+VotePanel.test);
         }
-        c_pos=compute_pos(VotePanel.test,tst,cc.size()-1); //pr
-    
-      //  for(int s:c_pos)
-        //     System.out.println("c_pos "+s);
-        //update list1 with list2 content
+        c_pos=compute_pos(VotePanel.test,tst,cc.size()-1); 
+
         list1=new ArrayList<>();
         for(Deque<Pair>pa:list2){
             list1.add(pa);
         }
             return list1;
     }
-    public static int[] compute_pos(List<Integer>initial, List<Integer>perm, int count){
-        int size=0;
-        int t_pos=0;
-        List<Integer>copy =new ArrayList<>();
-        List<Integer>c =new ArrayList<>();
-        List<Integer>cco =new ArrayList<>();
-        for(int u=0;u<cc.size();u++){
+    public static int[] compute_pos(List<Integer> initial, List<Integer> perm, int count) {
+        int size = 0;
+        int t_pos = 0;
+        List<Integer> copy = new ArrayList<>();
+        List<Integer> c = new ArrayList<>();
+        List<Integer> cco = new ArrayList<>();
+        for (int u = 0; u < cc.size(); u++) {
             copy.add(tst.get(cc.get(u)));
             cco.add(cc.get(u));
         }
-        for(int g:copy)
+        for (int g : copy) {
             c.add(g);
-        Collections.sort(copy);
-        for(int j=0;j<c.size();j++){
-            cc.set(j,cco.get(c.indexOf(copy.get(j))));
         }
-
-         for(int t=0;t<1;t++){ 
-                        
-                           size=VotePanel.init.get(cc.get(t));//брать из исходного test'a подумать как найти ширину последнего блока
-                       
-                           if(desired[cc.get(t)]!=0){//if not first swapping
-                              
-                                   desired[cc.get(t)]=VotePanel.test.get(perm.get(cc.get(t))-1)+VotePanel.init.get(perm.indexOf(perm.get(cc.get(t))-1));
-                   
-                                for(int y=perm.get(cc.get(t))+1;y<initial.size();y++){//2
-                                    
-                                    if(!sorted.contains(perm.indexOf(y)))
-                                    desired[perm.indexOf(y)]=desired[perm.indexOf(y-1)]+VotePanel.init.get(perm.indexOf(y-1));
-                                   
-                                }
-                             
-                                for(int f:cc){
-                                    sorted.add(f);
-                                }
+        Collections.sort(copy);
+        for (int j = 0; j < c.size(); j++) {
+            cc.set(j, cco.get(c.indexOf(copy.get(j))));
+        }
+        for (int t = 0; t < 1; t++) {
+            size = VotePanel.init.get(cc.get(t));
+            if (desired[cc.get(t)] != 0) {
+                desired[cc.get(t)] = VotePanel.test.get(perm.get(cc.get(t)) - 1) + VotePanel.init.get(perm.indexOf(perm.get(cc.get(t)) - 1));
+                for (int y = perm.get(cc.get(t)) + 1; y < initial.size(); y++) {
+                    if (!sorted.contains(perm.indexOf(y))) {
+                        desired[perm.indexOf(y)] = desired[perm.indexOf(y - 1)] + VotePanel.init.get(perm.indexOf(y - 1));
+                    }
                 }
-                           //}
-                           else{ //if first swapping !!!!IMPORTANT can be multiple first columns
-                               
-                              
-                               desired[cc.get(t)]=perm.get(cc.get(t));
-                                for(int y=perm.get(cc.get(t))+1;y<initial.size();y++){//2
-                                   
-                                    if(!sorted.contains(perm.indexOf(y))){
-                                    desired[perm.indexOf(y)]=desired[perm.indexOf(y-1)]+VotePanel.init.get(perm.indexOf(y-1));
-                                   
-                                    }
-                                }
-                                for(int f:cc){
-                                    sorted.add(f);
-                                } 
-                          }         
-                   }
-               
-         
-     return desired;
+                for (int f : cc) {
+                    sorted.add(f);
+                }
+            } else {
+                desired[cc.get(t)] = perm.get(cc.get(t));
+                for (int y = perm.get(cc.get(t)) + 1; y < initial.size(); y++) {
+                    if (!sorted.contains(perm.indexOf(y))) {
+                        desired[perm.indexOf(y)] = desired[perm.indexOf(y - 1)] + VotePanel.init.get(perm.indexOf(y - 1));
+                    }
+                }
+                for (int f : cc) {
+                    sorted.add(f);
+                }
+            }
+        }
+        return desired;
     }
-         public static void transition(int array[], Timer t){
-            
-           List<Integer>delta =new ArrayList<>();
-           for(int i=0;i<array.length;i++)
-               delta.add(9);//was 4
-           // boolean check=true;
-           /*for(int u=0;u<array.length;u++){
-               System.out.println("initial "+VotePanel.position[u]+" desired "+array[u]);
-           }*/
-           for(int y=0;y<array.length;y++){
-            if(VotePanel.position[y]==array[y])
-             //   check=false;
-            //if(check)
-                delta.set(y,0);
+    public static void transition(int array[], Timer t) {
+        List<Integer> delta = new ArrayList<>();
+        for (int i = 0; i < array.length; i++) {
+            delta.add(9);
+        }
+        for (int y = 0; y < array.length; y++) {
+            if (VotePanel.position[y] == array[y]) {
+                delta.set(y, 0);
             }
-            for(int x=0;x<array.length;x++){
-              if(VotePanel.position[x]<array[x]){
-                  if(array[x]-VotePanel.position[x]<=4 && (array[x]-VotePanel.position[x])!=0){
-                      VotePanel.position[x]+=array[x]-VotePanel.position[x];
-                  }
-                  else
-                      VotePanel.position[x]+=delta.get(x);
-              }
-              else{
-                  if(VotePanel.position[x]-array[x]<=4 && (VotePanel.position[x]-array[x])!=0){
-                      VotePanel.position[x]-=VotePanel.position[x]-array[x];
-                  }
-                  else
-                    VotePanel.position[x]-=delta.get(x);
-              }
-             // frame.repaint();
+        }
+        for (int x = 0; x < array.length; x++) {
+            if (VotePanel.position[x] < array[x]) {
+                if (array[x] - VotePanel.position[x] <= 4 && (array[x] - VotePanel.position[x]) != 0) {
+                    VotePanel.position[x] += array[x] - VotePanel.position[x];
+                } else {
+                    VotePanel.position[x] += delta.get(x);
+                }
+            } else {
+                if (VotePanel.position[x] - array[x] <= 4 && (VotePanel.position[x] - array[x]) != 0) {
+                    VotePanel.position[x] -= VotePanel.position[x] - array[x];
+                } else {
+                    VotePanel.position[x] -= delta.get(x);
+                }
             }
-            
-            zero=true;
-            for(int y=0;y<delta.size();y++){
-                  
-            if(delta.get(y)!=0){
-                 zero=false;
+        }
+        zero = true;
+        for (int y = 0; y < delta.size(); y++) {
+            if (delta.get(y) != 0) {
+                zero = false;
             }
+        }
+        if (zero) {
+            for (int u = 0; u < delta.size(); u++) {
+                delta.set(u, 4);
             }
-        if(zero){
-             for(int u=0;u<delta.size();u++){
-                 delta.set(u,4);
-             }
-           
         }
         frame.repaint();
-}
-         public static void swap_columns(int aa, Candidate c2){
-             cc=new ArrayList<>();
-             int m=0;
-              int a=0;
-                  for(Deque<Pair> f:tlist){
-                  a=0;
-                  for(Pair p:f){
-                      
-                      if(p.candidate.equals(c2) && a==aa){
-                         // System.out.println("chto to 0 "+m);
-                          cc.add(m);
-                      }
-                      a++;
-                  }
-                  m++;
-               }
+    }
+
+    public static void swap_columns(int aa, Candidate c2) {
+        cc = new ArrayList<>();
+        int m = 0;
+        int a = 0;
+        for (Deque<Pair> f : tlist) {
+            a = 0;
+            for (Pair p : f){
+                if (p.candidate.equals(c2) && a == aa) {
+                    cc.add(m);
+                }
+                a++;
+            }
+            m++;
+        }
 
                } 
-          public void switch_method(int array[], String chosen_method, Timer t){
+public void switch_method(int array[], String chosen_method, Timer t){
         for(int y=0;y<array.length;y++){
-                    if(VotePanel.score[y]==array[y])
-                        dlt[y]=0;
-                }
-            for(int x=0;x<array.length;x++){
+            if(VotePanel.score[y]==array[y])
+                dlt[y]=0;
+        }
+        for(int x=0;x<array.length;x++){
               if(VotePanel.score[x]<array[x])
                   VotePanel.score[x]+=dlt[x];
               else
@@ -660,7 +500,9 @@ timer4 = new Timer(15, new ActionListener(){//PP
                        }
         frame.repaint();
 }
-
+public static void execute_timer(){
+    
+}
     public String toString(){
         return "(" + this.list + ")";
     }
